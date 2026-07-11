@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aptitude Test</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script type="module">
+  import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/vision_bundle.mjs";
+  window.FilesetResolver = FilesetResolver;
+  window.FaceLandmarker = FaceLandmarker;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  
+  <script defer src="js/anti_cheat.js"></script>
+  <script defer src="js/aptitude.js"></script>
+</head>
+<body>
+
+<div id="warning-banner" class="warning-banner hidden"></div>
+
+<div class="interview-layout">
+
+  <!-- ── SIDEBAR ──────────────────────── -->
+  <aside class="sidebar">
+    <div class="camera-box">
+  <video id="camera-feed" autoplay muted playsinline></video>
+  <canvas id="detection-overlay" 
+          style="position:absolute; top:0; left:0; pointer-events:none;">
+  </canvas>
+  <div class="camera-status">
+    <span class="dot"></span><span>REC</span>
+  </div>
+  <div class="gaze-indicator" id="gaze-indicator">
+    👁️ <span id="gaze-text">Tracking...</span>
+  </div>
+</div>
+
+    <div style="margin-top:16px;">
+      <h3 id="candidate-name">Candidate</h3>
+      <p style="color:var(--text-dim); font-size:13px;" id="job-title"></p>
+    </div>
+
+    <div style="margin-top:20px;">
+      <h3 style="font-size:14px;">Progress</h3>
+      <div style="margin-top:12px;">
+        <div class="check-item">
+          <span class="check-icon pass">✓</span>
+          <span style="font-size:14px;">Communication</span>
+        </div>
+        <div class="check-item">
+          <span class="check-icon pending" id="r2-icon">2</span>
+          <span style="font-size:14px;">Aptitude</span>
+        </div>
+        <div class="check-item">
+          <span class="check-icon pending">3</span>
+          <span style="font-size:14px;">AI Interview</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; padding:12px; background:var(--bg-input); border-radius:8px;">
+      <p style="font-size:12px; color:var(--text-dim);">Anti-Cheat</p>
+      <p style="font-size:13px; margin-top:4px;">
+        Flags: <span id="flag-count">0</span>/3
+      </p>
+    </div>
+
+    <div style="margin-top:16px; padding:12px; background:var(--bg-input); border-radius:8px;">
+      <p style="font-size:12px; color:var(--text-dim);">Question Progress</p>
+      <div class="progress-bar" style="margin-top:8px;">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <p style="font-size:12px; margin-top:6px;">
+        <span id="q-num">0</span> of <span id="q-total">20</span>
+      </p>
+    </div>
+  </aside>
+
+  <main class="main-area">
+
+  <!-- Pre-start -->
+  <div id="pre-start" style="text-align:center; padding:40px;">
+    <div style="font-size:48px; margin-bottom:16px;">🧠</div>
+    <h2>Aptitude Test</h2>
+    <p class="subtitle">
+      20 questions across 4 sections • 60 seconds each • No going back
+    </p>
+
+    <div style="text-align:left; max-width:500px; margin:24px auto;">
+      <div class="check-item">
+        <span>📚</span>
+        <div>
+          <strong>4 Sections (5 questions each)</strong>
+          <p style="font-size:13px; color:var(--text-dim);">
+            Verbal • Reasoning • Numerical • Programming
+          </p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span>⏱️</span>
+        <div>
+          <strong>60 seconds per question</strong>
+          <p style="font-size:13px; color:var(--text-dim);">Faster answers = more points</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span>🚫</span>
+        <div>
+          <strong>No navigation back</strong>
+          <p style="font-size:13px; color:var(--text-dim);">Once submitted, cannot change</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span>👁️</span>
+        <div>
+          <strong>Camera + anti-cheat active</strong>
+          <p style="font-size:13px; color:var(--text-dim);">Do not switch tabs</p>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="btn" id="start-btn">
+      Start Test →
+    </button>
+  </div>
+
+  <!-- Section Intro -->
+  <div id="section-intro" class="hidden" style="text-align:center; padding:40px;">
+    <div style="font-size:14px; color:var(--text-dim); margin-bottom:8px;">
+      Section <span id="section-num">1</span> of <span id="section-total">4</span>
+    </div>
+    <h1 style="font-size:32px; margin:16px 0;" id="section-name">Verbal Ability</h1>
+    <p class="subtitle">
+      <span id="section-q-count">5</span> questions • 60 seconds each
+    </p>
+
+    <div style="background:var(--bg-input); border-radius:8px; padding:20px; max-width:400px; margin:24px auto;">
+      <p style="font-size:14px; color:var(--text-dim);">
+        Get ready. Once you start, the timer cannot be paused.
+      </p>
+    </div>
+
+    <button type="button" class="btn" id="next-section-btn">
+      Start Section →
+    </button>
+  </div>
+
+  <!-- Question Area -->
+  <div id="question-area" class="hidden">
+    <div class="round-info">
+      <div>
+        <p style="font-size:12px; color:var(--text-dim);" id="section-label">Section</p>
+        <h2>Question <span id="current-q">1</span> of <span id="section-q-total">5</span></h2>
+      </div>
+      <div class="timer" id="timer">60</div>
+    </div>
+
+    <div class="mcq-question" id="question-text">
+      Loading...
+    </div>
+
+    <div class="mcq-options" id="options-list">
+    </div>
+
+    <button type="button" class="btn" id="submit-btn" disabled>
+      Submit & Next →
+    </button>
+  </div>
+
+  <!-- Complete -->
+  <div id="complete-area" class="hidden" style="text-align:center; padding:40px;">
+    <div style="font-size:64px;">✅</div>
+    <h2>Aptitude Complete!</h2>
+    <p class="subtitle" id="score-text"></p>
+    <button type="button" class="btn" id="next-btn">
+      Continue to AI Interview →
+    </button>
+  </div>
+
+</main>
+</div>
+
+</body>
+</html>

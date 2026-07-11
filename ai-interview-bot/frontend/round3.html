@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Interview - Round 3</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script type="module">
+  import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/vision_bundle.mjs";
+  window.FilesetResolver = FilesetResolver;
+  window.FaceLandmarker = FaceLandmarker;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  
+  <script defer src="js/speech.js"></script>
+  <script defer src="js/anti_cheat.js"></script>
+  <script defer src="js/round3.js"></script>
+</head>
+<body>
+
+<div id="warning-banner" class="warning-banner hidden"></div>
+
+<div class="interview-layout">
+
+  <!-- ── SIDEBAR ──────────────────────── -->
+  <aside class="sidebar">
+    <div class="camera-box">
+      <video id="camera-feed" autoplay muted playsinline></video>
+      <canvas id="detection-overlay" 
+              style="position:absolute; top:0; left:0; pointer-events:none;"></canvas>
+      <div class="camera-status">
+        <span class="dot"></span><span>REC</span>
+      </div>
+      <div class="gaze-indicator" id="gaze-indicator">
+        👁️ <span id="gaze-text">Tracking...</span>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <h3 id="candidate-name">Candidate</h3>
+      <p style="color:var(--text-dim); font-size:13px;" id="job-title"></p>
+    </div>
+
+    <div style="margin-top:20px;">
+      <h3 style="font-size:14px;">Progress</h3>
+      <div style="margin-top:12px;">
+        <div class="check-item">
+          <span class="check-icon pass">✓</span>
+          <span style="font-size:14px;">Communication</span>
+        </div>
+        <div class="check-item">
+          <span class="check-icon pass">✓</span>
+          <span style="font-size:14px;">Aptitude</span>
+        </div>
+        <div class="check-item">
+          <span class="check-icon pending" id="r3-icon">3</span>
+          <span style="font-size:14px;">AI Interview</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; padding:12px; background:var(--bg-input); border-radius:8px;">
+      <p style="font-size:12px; color:var(--text-dim);">Anti-Cheat</p>
+      <p style="font-size:13px; margin-top:4px;">
+        Flags: <span id="flag-count">0</span>
+      </p>
+    </div>
+
+    <div style="margin-top:16px; padding:12px; background:var(--bg-input); border-radius:8px;">
+      <p style="font-size:12px; color:var(--text-dim);">Questions Asked</p>
+      <p style="font-size:13px; margin-top:4px;">
+        <span id="q-count">0</span> of ~8
+      </p>
+    </div>
+  </aside>
+
+  <!-- ── MAIN AREA ──────────────────────── -->
+  <main class="main-area">
+    <div class="round-info">
+      <h2>Round 3: AI Interview</h2>
+      <div class="timer" id="timer">25:00</div>
+    </div>
+
+    <!-- Pre-start -->
+    <div id="pre-start" style="text-align:center; padding:40px;">
+      <div style="font-size:48px; margin-bottom:16px;">🤖</div>
+      <h2>Conversational AI Interview</h2>
+      <p class="subtitle">
+        This is a real conversation with our AI interviewer. 
+        Answer naturally - follow-up questions will be asked based on your responses.
+      </p>
+
+      <ul style="text-align:left; max-width:450px; margin:24px auto;">
+        <li class="check-item">
+          <span>💬</span>
+          <div>
+            <strong>Natural conversation flow</strong>
+            <p style="font-size:13px; color:var(--text-dim);">AI listens and asks follow-ups</p>
+          </div>
+        </li>
+        <li class="check-item">
+          <span>🎤</span>
+          <div>
+            <strong>Auto-recording enabled</strong>
+            <p style="font-size:13px; color:var(--text-dim);">Stops after 3 sec silence</p>
+          </div>
+        </li>
+        <li class="check-item">
+          <span>⏱️</span>
+          <div>
+            <strong>25 minutes total</strong>
+            <p style="font-size:13px; color:var(--text-dim);">~6-8 questions expected</p>
+          </div>
+        </li>
+      </ul>
+
+      <button type="button" class="btn" id="start-btn">
+        Start AI Interview →
+      </button>
+    </div>
+
+    <!-- Conversation Area -->
+    <div id="conversation-area" class="hidden">
+      <div class="question-box" id="question-box">
+        Waiting for AI...
+      </div>
+
+      <div class="status-pill" id="status-pill">
+        <span id="status-icon">⏳</span>
+        <span id="status-text">Preparing...</span>
+      </div>
+
+      <div class="answer-box">
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">
+          Your Answer:
+        </p>
+        <div id="answer-text">—</div>
+      </div>
+
+      <button type="button" class="btn hidden" id="done-btn">
+        ✓ Done Answering
+      </button>
+    </div>
+
+    <!-- Complete -->
+    <div id="complete-area" class="hidden" style="text-align:center; padding:40px;">
+      <div style="font-size:64px;">🎉</div>
+      <h2>Interview Complete!</h2>
+      <p class="subtitle" id="round-score"></p>
+      <p style="margin-top:16px;">Generating your report...</p>
+      <button type="button" class="btn hidden" id="finish-btn">
+        View Completion →
+      </button>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

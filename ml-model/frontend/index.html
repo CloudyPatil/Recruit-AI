@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Matcher</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 40px auto; padding: 20px; }
+        textarea { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: #007bff; color: white; padding: 12px 30px; border: none; cursor: pointer; font-size: 16px; }
+        .result { background: #f4f4f4; padding: 20px; margin-top: 20px; border-radius: 8px; }
+        .score { font-size: 32px; color: #28a745; font-weight: bold; }
+        .skill { display: inline-block; background: #007bff; color: white; padding: 5px 10px; margin: 3px; border-radius: 4px; }
+        .missing { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>📄 Resume Matcher</h1>
+    
+    <h3>Upload Resume File:</h3>
+    <input type="file" id="resumeFile" accept=".pdf,.docx,.png,.jpg,.jpeg">
+    
+    <h3>Job Description:</h3>
+    <textarea id="jobDesc" rows="6" placeholder="Paste job description..."></textarea>
+    
+    <button onclick="match()">Match Now</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function match() {
+            const file = document.getElementById('resumeFile').files[0];
+            const job = document.getElementById('jobDesc').value;
+            
+            if (!file || !job) {
+                alert('Upload resume and enter job description');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('resume_file', file);
+            formData.append('job_description', job);
+            
+            document.getElementById('result').innerHTML = 'Processing...';
+            
+            const res = await fetch('http://localhost:8000/match-file', {
+            method: 'POST',
+            body: formData
+            });
+            
+            const data = await res.json();
+            
+            let html = `
+                <div class="result">
+                    <div class="score">${data.final_score}% Match</div>
+                    <p>Semantic: ${data.semantic_score}% | Skills: ${data.skill_score}%</p>
+                    <h4>Matched Skills:</h4>
+                    ${data.matched_skills.map(s => `<span class="skill">${s}</span>`).join('')}
+                    <h4>Missing Skills:</h4>
+                    ${data.missing_skills.map(s => `<span class="skill missing">${s}</span>`).join('')}
+                </div>
+            `;
+            
+            document.getElementById('result').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

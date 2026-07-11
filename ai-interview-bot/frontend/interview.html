@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Interview</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script type="module">
+  import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/vision_bundle.mjs";
+  window.FilesetResolver = FilesetResolver;
+  window.FaceLandmarker = FaceLandmarker;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  
+  <script defer src="js/speech.js"></script>
+  <script defer src="js/anti_cheat.js"></script>
+  <script defer src="js/interview.js"></script>
+</head>
+<body>
+<body>
+
+<!-- Warning Banner -->
+<div id="warning-banner" class="warning-banner hidden"></div>
+
+<div class="interview-layout">
+
+  <!-- ── SIDEBAR ────────────────────────── -->
+  <aside class="sidebar">
+    <!-- Camera -->
+    <div class="camera-box">
+      <video id="camera-feed" autoplay muted playsinline></video>
+      <canvas id="detection-overlay" 
+          style="position:absolute; top:0; left:0; pointer-events:none;">
+      </canvas>
+      <div class="camera-status">
+      <span class="dot"></span><span>REC</span>
+      </div>
+      <div class="gaze-indicator" id="gaze-indicator">
+      👁️ <span id="gaze-text">Tracking...</span>
+      </div>
+    </div>
+
+    <!-- Candidate Info -->
+    <div style="margin-top:16px;">
+      <h3 id="candidate-name">Loading...</h3>
+      <p style="color:var(--text-dim); font-size:13px;" id="job-title"></p>
+    </div>
+
+    <!-- Round Progress -->
+    <div style="margin-top:20px;">
+      <h3 style="font-size:14px;">Progress</h3>
+      <div id="round-list" style="margin-top:12px;">
+        <div class="check-item">
+          <span class="check-icon pending">1</span>
+          <span style="font-size:14px;">Communication</span>
+        </div>
+        <div class="check-item">
+          <span class="check-icon pending">2</span>
+          <span style="font-size:14px;">Aptitude</span>
+        </div>
+        <div class="check-item">
+          <span class="check-icon pending">3</span>
+          <span style="font-size:14px;">AI Interview</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anti-Cheat Status -->
+    <div style="margin-top:20px; padding:12px; background:var(--bg-input); border-radius:8px;">
+      <p style="font-size:12px; color:var(--text-dim);">Anti-Cheat</p>
+      <p style="font-size:13px; margin-top:4px;">
+        Flags: <span id="flag-count">0</span>/3
+      </p>
+    </div>
+  </aside>
+
+  <!-- ── MAIN AREA ──────────────────────── -->
+  <main class="main-area">
+    <div class="round-info">
+      <h2 id="round-label">Round 1: Communication</h2>
+      <div class="timer" id="timer">15:00</div>
+    </div>
+
+    <!-- Pre-start Screen -->
+    <div id="pre-start" style="text-align:center; padding:40px;">
+      <div style="font-size:48px; margin-bottom:16px;">🎤</div>
+      <h2>Ready to Begin?</h2>
+      <p class="subtitle">
+        You will be asked 5 questions. Answer naturally - the AI will listen and evaluate.
+      </p>
+      <ul style="text-align:left; max-width:400px; margin:24px auto;">
+        <li class="check-item">
+          <span>✓</span> Speak clearly into your microphone
+        </li>
+        <li class="check-item">
+          <span>✓</span> Look at the camera while answering
+        </li>
+        <li class="check-item">
+          <span>✓</span> Do not switch tabs or windows
+        </li>
+        <li class="check-item">
+          <span>✓</span> Click "Done Answering" when finished
+        </li>
+      </ul>
+      <button type="button" class="btn" id="start-btn">
+        Start Round 1 →
+      </button>
+    </div>
+
+    <!-- Question + Answer Area -->
+    <div id="qa-area" class="hidden">
+      <p style="color:var(--text-dim); font-size:14px;">
+        Question <span id="q-num">1</span> of <span id="q-total">5</span>
+      </p>
+
+      <div class="question-box" id="question-box">
+        Waiting for question...
+      </div>
+
+      <div class="status-pill" id="status-pill">
+        <span id="status-icon">⏳</span>
+        <span id="status-text">Preparing...</span>
+      </div>
+
+      <div class="answer-box">
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">
+          Your Answer:
+        </p>
+        <div id="answer-text">—</div>
+      </div>
+
+      <button type="button" class="btn hidden" id="record-btn">
+        🎤 Start Answering
+      </button>
+      <button type="button" class="btn hidden" id="done-btn">
+        ✓ Done Answering
+      </button>
+    </div>
+
+    <!-- Round Complete -->
+    <div id="round-complete" class="hidden" style="text-align:center; padding:40px;">
+      <div style="font-size:48px;">✅</div>
+      <h2>Round Complete!</h2>
+      <p class="subtitle" id="round-score"></p>
+      <button type="button" class="btn" id="next-round-btn">Continue →</button>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

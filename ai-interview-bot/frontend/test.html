@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Camera Test</title></head>
+<body>
+<video id="v" autoplay muted playsinline 
+       style="width:400px; background:black;"></video>
+<script>
+navigator.mediaDevices.getUserMedia({video:true})
+  .then(s => {
+    document.getElementById("v").srcObject = s;
+    console.log("✅ Camera works");
+  })
+  .catch(e => console.error("❌", e));
+</script>
+</body>
+</html>

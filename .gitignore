@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+*.env
+.env
+
+# Node
+node_modules/
+build/
+.env.local
+
+# ML
+models/sbert_model/
+extracted_texts/
+dataset2/
+uploads/
+resumes/
+
+# DeepFace
+E:/deepface/
+
+# IDE
+.vscode/
+.idea/

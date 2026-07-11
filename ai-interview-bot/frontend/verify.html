@@ -1,0 +1,120 @@
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Identity Verification</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  ...
+</head>
+
+<body>
+
+<div class="center-screen">
+  <div class="card card-xl">
+
+    <h1>🔐 Identity Verification</h1>
+    <p class="subtitle">
+      3-step verification before interview begins
+    </p>
+
+    <div style="display:flex; gap:8px; margin:24px 0;">
+      <div id="step1" class="badge badge-info">1. Upload ID</div>
+      <div id="step2" class="badge badge-warning">2. Name Match</div>
+      <div id="step3" class="badge badge-warning">3. Face Match</div>
+    </div>
+
+    <!-- STEP 1: Upload ID -->
+    <div id="step-upload">
+      <h3>Step 1: Upload Valid Photo ID</h3>
+      <p class="subtitle">
+        Accepted: Aadhar Card, PAN Card, Driving License, Passport, Voter ID, College ID
+      </p>
+
+      <label class="file-upload" for="id-file">
+        <div style="font-size:32px; margin-bottom:8px;">📄</div>
+        <p><strong>Click to upload ID photo</strong></p>
+        <p style="font-size:13px; color:var(--text-dim); margin-top:8px;">
+          JPG / PNG (max 5MB)
+        </p>
+      </label>
+      <input type="file" id="id-file" accept="image/*" style="display:none;"/>
+
+      <div id="id-preview" class="hidden" style="margin-top:20px;">
+        <img id="id-img" style="max-width:100%; max-height:300px; border-radius:10px;"/>
+        <button type="button" class="btn" id="validate-id-btn">
+          Validate ID →
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Validation Result -->
+    <div id="step-validation" class="hidden">
+      <h3>Step 2: Document Validation</h3>
+      <div id="validation-result"></div>
+      <button type="button" class="btn hidden" id="proceed-camera-btn">
+        Proceed to Face Capture →
+      </button>
+      <button type="button" class="btn btn-secondary hidden" id="reupload-btn">
+        Upload Different ID
+      </button>
+    </div>
+
+    <!-- STEP 3: Camera -->
+    <div id="step-camera" class="hidden">
+      <h3>Step 3: Face Capture</h3>
+      <p class="subtitle">
+        Position your face in the circle. Auto-captures when aligned.
+      </p>
+
+      <div class="camera-wrapper" style="max-width:500px; margin:0 auto; position:relative;">
+        <div class="camera-box" style="position:relative;">
+          <video id="video" autoplay muted playsinline></video>
+          
+          <div class="face-overlay">
+            <div id="face-guide" class="face-guide"></div>
+            <p id="face-status" class="face-status">
+              Position face in circle
+            </p>
+          </div>
+
+          <div class="camera-status">
+            <span class="dot"></span><span>LIVE</span>
+          </div>
+        </div>
+      </div>
+
+      <canvas id="canvas" class="hidden"></canvas>
+
+      <div id="captured-preview" class="hidden" style="margin-top:16px; text-align:center;">
+        <img id="captured-img" style="max-width:300px; border-radius:10px;"/>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:16px;">
+        <button type="button" class="btn btn-secondary" id="capture-btn">
+          📸 Manual Capture
+        </button>
+        <button type="button" class="btn hidden" id="verify-btn">
+          ✓ Verify Face
+        </button>
+        <button type="button" class="btn btn-secondary hidden" id="retake-btn">
+          🔄 Retake
+        </button>
+      </div>
+    </div>
+
+    <!-- VERIFYING -->
+    <div id="step-verifying" class="hidden" style="text-align:center; padding:40px;">
+      <div style="font-size:48px; margin-bottom:16px;">⏳</div>
+      <h3 id="verifying-text">Verifying...</h3>
+      <p class="subtitle">This takes about 10-15 seconds</p>
+    </div>
+
+    <!-- RESULT -->
+    <div id="step-result" class="hidden" style="text-align:center; padding:20px;">
+      <div id="result-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/verify.js"></script>
+</body>

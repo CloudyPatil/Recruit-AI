@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Interview Portal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="center-screen">
+  <div class="card card-lg">
+
+    <div style="text-align:center; margin-bottom:24px;">
+      <div style="font-size:48px; margin-bottom:12px;">🤖</div>
+      <h1>AI Interview Portal</h1>
+      <p class="subtitle">
+        Enter your interview link to begin
+      </p>
+    </div>
+
+    <div id="loading" class="hidden">
+      <p style="text-align:center; color:var(--text-dim);">
+        Validating your interview link...
+      </p>
+    </div>
+
+    <div id="error-box" class="hidden">
+      <div class="badge badge-danger" style="margin-bottom:16px;">
+        ⚠️ Error
+      </div>
+      <p id="error-msg"></p>
+    </div>
+
+    <div id="link-input">
+      <label style="display:block; margin-bottom:8px;">
+        Interview Link / Token
+      </label>
+      <input 
+        type="text" 
+        id="token-input"
+        class="input"
+        placeholder="Paste your token here..."
+      />
+      <button class="btn" onclick="validateToken()">
+        Continue →
+      </button>
+    </div>
+
+    <div id="welcome-box" class="hidden">
+      <div style="text-align:center; padding:20px 0;">
+        <h2 id="welcome-name">Welcome!</h2>
+        <p class="subtitle" id="welcome-job"></p>
+
+        <div style="text-align:left; margin:24px 0;">
+          <h3>Interview Structure</h3>
+          <ul class="check-list">
+            <li class="check-item">
+              <span class="check-icon pending">1</span>
+              <div>
+                <strong>Identity Verification</strong>
+                <p style="font-size:13px; color:var(--text-dim);">
+                  Upload ID + face match (2 min)
+                </p>
+              </div>
+            </li>
+            <li class="check-item">
+              <span class="check-icon pending">2</span>
+              <div>
+                <strong>Communication Round</strong>
+                <p style="font-size:13px; color:var(--text-dim);">
+                  5 questions, voice answers (15 min)
+                </p>
+              </div>
+            </li>
+            <li class="check-item">
+              <span class="check-icon pending">3</span>
+              <div>
+                <strong>Aptitude Test</strong>
+                <p style="font-size:13px; color:var(--text-dim);">
+                  15 MCQs (20 min)
+                </p>
+              </div>
+            </li>
+            <li class="check-item">
+              <span class="check-icon pending">4</span>
+              <div>
+                <strong>AI Interview</strong>
+                <p style="font-size:13px; color:var(--text-dim);">
+                  Conversational interview (25 min)
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <button class="btn" onclick="startVerification()">
+          Begin Verification →
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<script>
+const API = "http://localhost:5001/api";
+let interviewData = null;
+
+// Auto-fill token from URL query parameter (?token=XXX)
+window.onload = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get("token");
+  
+  if (token && token.length > 20) {
+    document.getElementById("token-input").value = token;
+    validateToken();
+  }
+};
+
+async function validateToken() {
+  const token = document.getElementById("token-input").value.trim();
+  if (!token) {
+    showError("Please enter your interview token");
+    return;
+  }
+
+  document.getElementById("link-input").classList.add("hidden");
+  document.getElementById("loading").classList.remove("hidden");
+
+  try {
+    const res = await fetch(`${API}/interview/validate/${token}`);
+    const data = await res.json();
+
+    document.getElementById("loading").classList.add("hidden");
+
+    if (!data.valid) {
+      showError(data.error);
+      return;
+    }
+
+    interviewData = data;
+    sessionStorage.setItem("interview_id", data.interview_id);
+    sessionStorage.setItem("candidate_name", data.candidate_name);
+    sessionStorage.setItem("job_title", data.job_title);
+    sessionStorage.setItem("token", token);
+
+    document.getElementById("welcome-name").textContent = 
+      `Welcome, ${data.candidate_name}`;
+    document.getElementById("welcome-job").textContent = 
+      `Position: ${data.job_title}`;
+    document.getElementById("welcome-box").classList.remove("hidden");
+
+  } catch (err) {
+    document.getElementById("loading").classList.add("hidden");
+    showError("Could not connect to server");
+  }
+}
+
+function showError(msg) {
+  document.getElementById("link-input").classList.remove("hidden");
+  const box = document.getElementById("error-box");
+  box.classList.remove("hidden");
+  document.getElementById("error-msg").textContent = msg;
+}
+
+function startVerification() {
+  window.location.href = "verify.html";
+}
+</script>
+
+
+</body>
+</html>
