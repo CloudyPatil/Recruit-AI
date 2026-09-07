@@ -129,7 +129,7 @@ Return ONLY valid JSON:
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="llama3-8b-8192",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=1500,
