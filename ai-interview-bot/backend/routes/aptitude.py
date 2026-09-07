@@ -27,10 +27,10 @@ def start_aptitude(interview_id):
             print(f"Aptitude generation failed: {e}")
             return jsonify({"error": "Failed to generate questions"}), 500
     
-    # Group by section
+    # Group by section - normalize case
     sections = {}
     for q in questions:
-        section = q.get("section", "General")
+        section = q.get("section", "General").strip().title()
         if section not in sections:
             sections[section] = []
         
@@ -44,43 +44,53 @@ def start_aptitude(interview_id):
             "options": options_list
         })
     
-    # Order sections
-    # Order sections (flexible matching)
-    section_keywords = {
-        "Verbal": ["verbal", "english", "comprehension"],
-        "Reasoning": ["reasoning", "logical", "logic"],
-           "Numerical": ["numerical", "quantitative", "math"],
-           "Programming": ["programming", "coding", "computer"]
-    }
-
+    # DEBUG
+    print("Sections found:", list(sections.keys()))
+    print("Questions per section:", {k: len(v) for k, v in sections.items()})
+    
     ordered_sections = []
     used_keys = set()
-
+    
+    section_keywords = {
+        "Verbal": ["verbal", "english", "comprehension", "grammar"],
+        "Reasoning": ["reasoning", "logical", "logic"],
+        "Numerical": ["numerical", "quantitative", "math", "arithmetic"],
+        "Programming": ["programming", "coding", "computer"]
+    }
+    
     for display_name, keywords in section_keywords.items():
         for key in sections.keys():
-               if key in used_keys:
-                  continue
-               if any(kw in key.lower() for kw in keywords):
-                   ordered_sections.append({
-                       "name": display_name,
-                       "questions": sections[key]
-                   })
-                   used_keys.add(key)
-                   break
+            if key in used_keys:
+                continue
+            if any(kw in key.lower() for kw in keywords):
+                ordered_sections.append({
+                    "name": display_name,
+                    "questions": sections[key]
+                })
+                used_keys.add(key)
+                break
 
-    # Add any remaining sections
     for key in sections.keys():
-           if key not in used_keys:
-              ordered_sections.append({
-                  "name": key,
-                  "questions": sections[key]
-              })
+        if key not in used_keys:
+            ordered_sections.append({
+                "name": key,
+                "questions": sections[key]
+            })
+    
+    # FALLBACK - if empty, put all in one section
+    if not ordered_sections:
+        all_qs = []
+        for qs in sections.values():
+            all_qs.extend(qs)
+        ordered_sections = [{"name": "General", "questions": all_qs}]
+
+    print("Ordered sections:", [(s["name"], len(s["questions"])) for s in ordered_sections])
 
     return jsonify({
-           "sections":        ordered_sections,
-           "total_questions": len(questions),
-           "time_per_q":      60,
-          "time_limit":      20 * 60
+        "sections": ordered_sections,
+        "total_questions": len(questions),
+        "time_per_q": 60,
+        "time_limit": 20 * 60
     })
 
 

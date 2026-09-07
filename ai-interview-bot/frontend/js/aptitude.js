@@ -187,7 +187,7 @@ async function completeTest() {
   document.getElementById("question-area").classList.add("hidden");
   document.getElementById("complete-area").classList.remove("hidden");
 
-  const res = await fetch(`${API}/aptitude/submit`, {
+  await fetch(`${API}/aptitude/submit`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -195,10 +195,10 @@ async function completeTest() {
       answers: answers
     })
   });
-  const data = await res.json();
 
+  // Hide score - just show completion message
   document.getElementById("score-text").textContent =
-    `You scored ${data.round2_score}% — Moving to AI Interview`;
+    "Test completed successfully. Proceeding to AI Interview.";
 
   document.getElementById("r2-icon").className = "check-icon pass";
   document.getElementById("r2-icon").textContent = "✓";

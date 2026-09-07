@@ -146,15 +146,15 @@ async function completeRound1() {
   document.getElementById("qa-area").classList.add("hidden");
   document.getElementById("round-complete").classList.remove("hidden");
 
-  const res = await fetch(`${API}/interview/round1/complete`, {
+  await fetch(`${API}/interview/round1/complete`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ interview_id: interviewId })
   });
-  const data = await res.json();
 
+  // Hide score - only show completion
   document.getElementById("round-score").textContent = 
-    `Score: ${data.round1_score}% — Moving to Aptitude Round`;
+    "Round completed successfully. Proceeding to Aptitude Test.";
   
   const checks = document.querySelectorAll(".sidebar .check-icon");
   checks[0].className = "check-icon pass";

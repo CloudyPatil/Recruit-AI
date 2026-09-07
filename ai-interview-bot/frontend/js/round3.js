@@ -148,21 +148,19 @@ async function completeRound3() {
   document.getElementById("conversation-area").classList.add("hidden");
   document.getElementById("complete-area").classList.remove("hidden");
 
-  // Get round3 evaluation
-  const res = await fetch(`${API}/interview/round3/complete`, {
+  await fetch(`${API}/interview/round3/complete`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ interview_id: interviewId })
   });
-  const data = await res.json();
 
+  // Hide score
   document.getElementById("round-score").textContent = 
-    `Round 3 Score: ${data.round3_score}%`;
+    "Interview completed successfully. Your report will be reviewed by HR.";
   
   document.getElementById("r3-icon").className = "check-icon pass";
   document.getElementById("r3-icon").textContent = "✓";
 
-  // Generate final report
   await fetch(`${API}/report/generate/${interviewId}`, {
     method: "POST"
   });
